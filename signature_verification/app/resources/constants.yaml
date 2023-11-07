@@ -1,0 +1,2 @@
+max_pool: 5
+db_connection_timeout: 60
