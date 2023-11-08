@@ -86,7 +86,7 @@ class SignatureVerification(Model):
         query = {"_id": ObjectId(id)}
         data = syne_db_obj.read(query)
         object_name = data['name']
-        signature_path = os.path.join(cfg.BASE_DIR+f"/app/{data['image_path']}","output.png")
+        signature_path = os.path.join(cfg.BASE_DIR+f"/app/{data['image_path']}")
         actual_image = self.load_signature(signature_path)
         png_data = base64.b64decode(base64_image)
         with open(f"resources/signatures/output.png", "wb") as png_file:
