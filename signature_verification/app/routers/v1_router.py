@@ -7,6 +7,7 @@ from app.services.model_service.implementation.nested_table_inference import Nes
 from app.services.model_service.implementation.signature_verification_implementation import SignatureVerification
 import os
 import base64
+import app.config as cfg
 
 nested_table_obj = NestedTableExtraction()
 nested_table_obj.initialize()
@@ -52,7 +53,7 @@ async def register_signature(base_b4: str= Form(...), name: str= Form(...)):
     # Generate a unique filename to save the uploaded file
     base64_string = base_b4
     png_data = base64.b64decode(base64_string)
-    os.makedirs(f"resources/signatures/{name}", exist_ok=True)
+    os.makedirs(f"{cfg.BASE_DIR}/app/resources/signatures/{name}", exist_ok=True)
     with open(f"resources/signatures/{name}/output.png", "wb") as png_file:
         png_file.write(png_data)
     file_path = os.path.join(f"resources/signatures/{name}", "output.png")
