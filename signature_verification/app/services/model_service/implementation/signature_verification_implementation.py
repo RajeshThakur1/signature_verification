@@ -89,9 +89,9 @@ class SignatureVerification(Model):
         signature_path = os.path.join(cfg.BASE_DIR+f"/app/{data['image_path']}")
         actual_image = self.load_signature(signature_path)
         png_data = base64.b64decode(base64_image)
-        with open(f"resources/signatures/output.png", "wb") as png_file:
+        with open(f"{cfg.BASE_DIR}/app/resources/signatures/output.png", "wb") as png_file:
             png_file.write(png_data)
-        to_be_verified_image = self.load_signature(f"resources/signatures/output.png")
+        to_be_verified_image = self.load_signature(f"{cfg.BASE_DIR}/app/resources/signatures/output.png")
         actual_image_normalized = 255 - normalize_image(actual_image, (952, 1360))
         actual_image_resized = resize_image(actual_image_normalized, (170, 242))
         actual_image_cropped = crop_center(actual_image_resized, (150, 220))
