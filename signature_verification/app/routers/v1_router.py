@@ -54,7 +54,7 @@ async def register_signature(base_b4: str= Form(...), name: str= Form(...)):
     base64_string = base_b4
     png_data = base64.b64decode(base64_string)
     os.makedirs(f"{cfg.BASE_DIR}/app/resources/signatures/{name}", exist_ok=True)
-    with open(f"resources/signatures/{name}/output.png", "wb") as png_file:
+    with open(f"{cfg.BASE_DIR}/resources/signatures/{name}/output.png", "wb") as png_file:
         png_file.write(png_data)
     file_path = os.path.join(f"resources/signatures/{name}", "output.png")
     return {"data": sign_verification_obj.register(file_path, name)}
