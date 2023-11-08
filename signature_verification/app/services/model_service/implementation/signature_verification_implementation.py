@@ -12,12 +12,15 @@ from bson import ObjectId
 import base64
 import torch.nn.functional as F
 import os
+import pickle
+import json
 from sigver.preprocessing.normalize import (
     normalize_image, resize_image,
     crop_center, preprocess_signature)
 
 # Functions to load the CNN model
 from sigver.featurelearning.models import SigNet
+import app.config as cfg
 
 # Functions for plotting:
 import matplotlib.pyplot as plt
@@ -33,7 +36,7 @@ class SignatureVerification(Model):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info('Using device: {}'.format(self.device))
 
-        state_dict_f, _, _ = torch.load('resources/signet_f_lambda_0.95.pth')
+        state_dict_f, _, _ = torch.load(cfg.BASE_DIR+'/app/resources/signet_f_lambda_0.95.pth')
         self.base_model_f = SigNet().to(self.device).eval()
         self.base_model_f.load_state_dict(state_dict_f)
 
@@ -83,7 +86,7 @@ class SignatureVerification(Model):
         query = {"_id": ObjectId(id)}
         data = syne_db_obj.read(query)
         object_name = data['name']
-        signature_path = data['image_path']
+        signature_path = os.path.join(cfg.BASE_DIR+f"/app/{data['image_path']}","output.png")
         actual_image = self.load_signature(signature_path)
         png_data = base64.b64decode(base64_image)
         with open(f"resources/signatures/output.png", "wb") as png_file:
@@ -104,6 +107,11 @@ class SignatureVerification(Model):
             actual_image_feature = self.base_model_f(actual_image_tensor.to(self.device))
             to_be_verified_image_feature = self.base_model_f(to_be_verified_image_tensor.to(self.device))
 
-        euclidean_distance = torch.norm(actual_image_feature - to_be_verified_image_feature).item()
-        cosine_similarity = F.cosine_similarity(actual_image_feature, to_be_verified_image_feature).item()
-        return {'name':object_name, 'euclidean_distance':euclidean_distance, 'cosine_similarity': cosine_similarity}
+        euclidean_distance = torch.norm(actual_image_feature - to_be_verified_image_feature)
+        # cosine_similarity = F.cosine_similarity(actual_image_feature, to_be_verified_image_feature).item()
+        lr = pickle.load(open(cfg.BASE_DIR+"/app/resources/sigver_cedar_lr_classifier.sav", "rb"))
+        label_pred = lr.predict(euclidean_distance.cpu().reshape(-1, 1))
+        label_probs = lr.predict_proba(euclidean_distance.cpu().reshape(-1, 1))[0][1]
+        # data = dict(name=object_name,label_pred=label_pred)
+        data = {"name":object_name, "label_pred": int(list(label_pred)[0]), "probability":float(label_probs)}
+        return data #json.dumps(data,indent = 4)

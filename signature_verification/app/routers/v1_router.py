@@ -62,6 +62,6 @@ async def register_signature(base_b4: str= Form(...), name: str= Form(...)):
 async def register_signature(id: str= Form(...), base64: str= Form(...)):
     # Generate a unique filename to save the uploaded file
 
-
-    return {"data": sign_verification_obj.verify_signature(id, base64)}
+    return sign_verification_obj.verify_signature(id, base64)
+    # return {"data": sign_verification_obj.verify_signature(id, base64)}
 
