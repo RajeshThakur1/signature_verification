@@ -1,7 +1,8 @@
 from app.utilities import synechron_logger
 from app.services.model_service.interface.model_interface import Model
 from transformers.pipelines import pipeline
-from PIL import Image
+from PIL import Image,ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 import torch
 import datetime
 
