@@ -54,6 +54,9 @@ async def register_signature(base_b4: str= Form(...), name: str= Form(...)):
     base64_string = base_b4
     logger.info(f"base-64 image\n\n{base64_string}")
     logger.info(f"len of base64:-\n{len(base64_string)}")
+    logger.info(f"Base64 image without repair\n\n\n{base64_string}")
+    base64_image = base64_string.replace('\n', '').replace('\r', '').replace(' ', '+')
+    logger.info(f'repaired base64 encoded\n{base64_image}')
     png_data = base64.b64decode(base64_string)
     os.makedirs(f"{cfg.BASE_DIR}/app/resources/signatures/{name}", exist_ok=True)
     with open(f"{cfg.BASE_DIR}/app/resources/signatures/{name}/output.png", "wb") as png_file:

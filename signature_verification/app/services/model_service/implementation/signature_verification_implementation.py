@@ -89,14 +89,24 @@ class SignatureVerification(Model):
 
         # Load the model
         logger.info("user inside the verify signature")
-        logger.info(f"Base64 image\n\n\n{base64_image}")
+        logger.info(f"Base64 image without repair\n\n\n{base64_image}")
+        base64_image = base64_image.replace('\n', '').replace('\r', '').replace(' ', '+')
+        logger.info(f'repaired base64 encoded\n{base64_image}')
         query = {"_id": ObjectId(id)}
         data = syne_db_obj.read(query)
         object_name = data['name']
         signature_path = os.path.join(cfg.BASE_DIR + f"/app/{data['image_path']}")
         logger.info("error-1")
         actual_image = self.load_signature(signature_path)
+        # png_data = base64.b64decode(base64_image + '=' * (-len(base64_image) % 4), validate=False)
+        # png_data = base64.b64decode(base64_image)
+        ########
+        missing_padding = len(base64_image) % 4
+        if missing_padding:
+            base64_image += b'=' * (4 - missing_padding)
+
         png_data = base64.b64decode(base64_image)
+
 
         to_be_verified_image = img_as_ubyte(skimage.io.imread(png_data, plugin='imageio', as_gray=True))
 
