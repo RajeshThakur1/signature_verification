@@ -82,15 +82,18 @@ class SignatureVerification(Model):
 
     def verify_signature(self,id, base64_image):
         # Load the model
-
+        logger.info("user inside the verify signature")
+        logger.info(f"Base64 image\n\n\n{base64_image}")
         query = {"_id": ObjectId(id)}
         data = syne_db_obj.read(query)
         object_name = data['name']
         signature_path = os.path.join(cfg.BASE_DIR+f"/app/{data['image_path']}")
         actual_image = self.load_signature(signature_path)
         png_data = base64.b64decode(base64_image)
+        logger.info("PNG data converted successfully")
         with open(f"{cfg.BASE_DIR}/app/resources/signatures/output.png", "wb") as png_file:
             png_file.write(png_data)
+        logger.info("PNG file written successfully")
         to_be_verified_image = self.load_signature(f"{cfg.BASE_DIR}/app/resources/signatures/output.png")
         actual_image_normalized = 255 - normalize_image(actual_image, (952, 1360))
         actual_image_resized = resize_image(actual_image_normalized, (170, 242))
@@ -110,8 +113,10 @@ class SignatureVerification(Model):
         euclidean_distance = torch.norm(actual_image_feature - to_be_verified_image_feature)
         # cosine_similarity = F.cosine_similarity(actual_image_feature, to_be_verified_image_feature).item()
         lr = pickle.load(open(cfg.BASE_DIR+"/app/resources/sigver_cedar_lr_classifier.sav", "rb"))
+        logger.info("classifier loaded successfully")
         label_pred = lr.predict(euclidean_distance.cpu().reshape(-1, 1))
         label_probs = lr.predict_proba(euclidean_distance.cpu().reshape(-1, 1))[0][1]
         # data = dict(name=object_name,label_pred=label_pred)
         data = {"name":object_name, "label_pred": int(list(label_pred)[0]), "probability":float(label_probs)}
-        return data #json.dumps(data,indent = 4)
+        logger.info(f"return object\n {data}")
+        return data
