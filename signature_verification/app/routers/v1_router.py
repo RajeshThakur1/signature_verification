@@ -52,6 +52,8 @@ async def upload_file(file: UploadFile = File(...), ques: str= Form(...)):
 async def register_signature(base_b4: str= Form(...), name: str= Form(...)):
     # Generate a unique filename to save the uploaded file
     base64_string = base_b4
+    logger.info(f"base-64 image\n\n{base64_string}")
+    logger.info(f"len of base64:-\n{len(base64_string)}")
     png_data = base64.b64decode(base64_string)
     os.makedirs(f"{cfg.BASE_DIR}/app/resources/signatures/{name}", exist_ok=True)
     with open(f"{cfg.BASE_DIR}/app/resources/signatures/{name}/output.png", "wb") as png_file:
