@@ -48,16 +48,36 @@ async def upload_file(file: UploadFile = File(...), ques: str= Form(...)):
     # Return a response with the uploaded file's details
     return {"data": nested_table_obj.predict(file_path, ques)}
 
+def isBase64(sb):
+    try:
+        if isinstance(sb, str):
+            # If there's any unicode here, an exception will be thrown and the function will return false
+            sb_bytes = bytes(sb, 'ascii')
+        elif isinstance(sb, bytes):
+            sb_bytes = sb
+        else:
+            raise ValueError("Argument must be string or bytes")
+        return base64.b64encode(base64.b64decode(sb_bytes)) == sb_bytes
+    except Exception:
+        return False
+
 @router.post("/register_signature/") #UploadFile = File(...)
 async def register_signature(base_b4: str= Form(...), name: str= Form(...)):
     # Generate a unique filename to save the uploaded file
+    status = isBase64(base_b4)
     base64_string = base_b4
+    # png_data = base64.b64decode(base64_string, '-_')
     logger.info(f"base-64 image\n\n{base64_string}")
     logger.info(f"len of base64:-\n{len(base64_string)}")
     logger.info(f"Base64 image without repair\n\n\n{base64_string}")
     base64_image = base64_string.replace('\n', '').replace('\r', '').replace(' ', '+')
     logger.info(f'repaired base64 encoded\n{base64_image}')
-    png_data = base64.b64decode(base64_string)
+    missing_padding = len(base64_image) % 4
+    if missing_padding:
+        base64_image += '=' * (4 - missing_padding)
+
+    png_data = base64.b64decode(base64_image)
+    # png_data = base64.b64decode(base64_string)
     os.makedirs(f"{cfg.BASE_DIR}/app/resources/signatures/{name}", exist_ok=True)
     with open(f"{cfg.BASE_DIR}/app/resources/signatures/{name}/output.png", "wb") as png_file:
         png_file.write(png_data)

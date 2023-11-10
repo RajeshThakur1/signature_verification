@@ -85,13 +85,26 @@ class SignatureVerification(Model):
 
         return {"status": f"signature of {name} registered successfully with inserted_id: {inserted_id}"}
 
+    def isBase64(self,sb):
+        try:
+            if isinstance(sb, str):
+                # If there's any unicode here, an exception will be thrown and the function will return false
+                sb_bytes = bytes(sb, 'ascii')
+            elif isinstance(sb, bytes):
+                sb_bytes = sb
+            else:
+                raise ValueError("Argument must be string or bytes")
+            return base64.b64encode(base64.b64decode(sb_bytes)) == sb_bytes
+        except Exception:
+            return False
     def verify_signature(self, id, base64_image):
-
+        status = self.isBase64(base64_image)
         # Load the model
         logger.info("user inside the verify signature")
         logger.info(f"Base64 image without repair\n\n\n{base64_image}")
         base64_image = base64_image.replace('\n', '').replace('\r', '').replace(' ', '+')
         logger.info(f'repaired base64 encoded\n{base64_image}')
+        status = self.isBase64(base64_image)
         query = {"_id": ObjectId(id)}
         data = syne_db_obj.read(query)
         object_name = data['name']
@@ -114,6 +127,7 @@ class SignatureVerification(Model):
         # with open(f"{cfg.BASE_DIR}/app/resources/signatures/output.png", "wb") as png_file:
         #     png_file.write(png_data)
         # logger.info("PNG file written successfully")
+
         logger.info("error-2")
         # to_be_verified_image = self.load_signature(f"{cfg.BASE_DIR}/app/resources/signatures/output.png")
         actual_image_normalized = 255 - normalize_image(actual_image, (952, 1360))
