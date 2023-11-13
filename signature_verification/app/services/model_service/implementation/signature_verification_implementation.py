@@ -153,6 +153,10 @@ class SignatureVerification(Model):
         label_pred = lr.predict(euclidean_distance.cpu().reshape(-1, 1))
         label_probs = lr.predict_proba(euclidean_distance.cpu().reshape(-1, 1))[0][1]
         # data = dict(name=object_name,label_pred=label_pred)
-        data = {"name": object_name, "label_pred": int(list(label_pred)[0]), "probability": round(float(label_probs),2)*100}
+        if int(list(label_pred)[0]):
+            data = {"name": object_name, "label_pred": int(list(label_pred)[0]), "probability": round(float(label_probs),2)*100}
+        else:
+            data = {"name": object_name, "label_pred": int(list(label_pred)[0]),
+                    "probability": 100-round(float(label_probs), 2) * 100}
         logger.info(f"return object\n {data}")
         return data
