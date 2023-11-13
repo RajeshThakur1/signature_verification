@@ -83,7 +83,7 @@ class SignatureVerification(Model):
         inserted_id = syne_db_obj.insert_one(data=record)
         logger.info(f"record data: {record}\n stored in signature_verification collection")
 
-        return {"status": f"signature of {name} registered successfully with inserted_id: {inserted_id}"}
+        return {"Status": f"Registered successfully","Name":name,"ID":str(inserted_id)}
 
     def isBase64(self,sb):
         try:
@@ -153,6 +153,6 @@ class SignatureVerification(Model):
         label_pred = lr.predict(euclidean_distance.cpu().reshape(-1, 1))
         label_probs = lr.predict_proba(euclidean_distance.cpu().reshape(-1, 1))[0][1]
         # data = dict(name=object_name,label_pred=label_pred)
-        data = {"name": object_name, "label_pred": int(list(label_pred)[0]), "probability": float(label_probs)}
+        data = {"name": object_name, "label_pred": int(list(label_pred)[0]), "probability": round(float(label_probs),2)*100}
         logger.info(f"return object\n {data}")
         return data
