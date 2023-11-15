@@ -124,23 +124,36 @@ class SignatureVerification(Model):
         to_be_verified_image = img_as_ubyte(skimage.io.imread(png_data, plugin='imageio', as_gray=True))
 
         logger.info("PNG data converted successfully")
-        # with open(f"{cfg.BASE_DIR}/app/resources/signatures/output.png", "wb") as png_file:
-        #     png_file.write(png_data)
-        # logger.info("PNG file written successfully")
+        with open(f"{cfg.BASE_DIR}/app/resources/signatures/raw_input_image.png", "wb") as png_file:
+            png_file.write(png_data)
+        logger.info("PNG file written successfully")
 
         logger.info("error-2")
         # to_be_verified_image = self.load_signature(f"{cfg.BASE_DIR}/app/resources/signatures/output.png")
         actual_image_normalized = 255 - normalize_image(actual_image, (952, 1360))
+        im = Image.fromarray(actual_image_normalized)
+        im.save(f"{cfg.BASE_DIR}/app/resources/signatures/actual_normalized.png")
         actual_image_resized = resize_image(actual_image_normalized, (170, 242))
+        im = Image.fromarray(actual_image_resized)
+        im.save(f"{cfg.BASE_DIR}/app/resources/signatures/actual_resized.png")
         actual_image_cropped = crop_center(actual_image_resized, (150, 220))
-
+        im = Image.fromarray(actual_image_cropped)
+        im.save(f"{cfg.BASE_DIR}/app/resources/signatures/actual_cropped.png")
+        # im = Image.fromarray(actual_image_cropped)
+        # im.save("actual.jpeg")
         to_be_verified_image_normalized = 255 - normalize_image(to_be_verified_image, (952, 1360))
+        im = Image.fromarray(to_be_verified_image_normalized)
+        im.save(f"{cfg.BASE_DIR}/app/resources/signatures/to_be_verified_normalized.png")
         to_be_verified_image_resized = resize_image(to_be_verified_image_normalized, (170, 242))
+        im = Image.fromarray(to_be_verified_image_resized)
+        im.save(f"{cfg.BASE_DIR}/app/resources/signatures/to_be_verified_resized.png")
         to_be_verified_image_cropped = crop_center(to_be_verified_image_resized, (150, 220))
-
+        im = Image.fromarray(to_be_verified_image_cropped)
+        im.save(f"{cfg.BASE_DIR}/app/resources/signatures/to_be_verified_cropped.png")
         actual_image_tensor = torch.tensor(actual_image_cropped).view(-1, 1, 150, 220).float().div(255)
         to_be_verified_image_tensor = torch.tensor(to_be_verified_image_cropped).view(-1, 1, 150, 220).float().div(
             255)
+
 
         with torch.no_grad():
             actual_image_feature = self.base_model_f(actual_image_tensor.to(self.device))
